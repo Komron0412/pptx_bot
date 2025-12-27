@@ -714,7 +714,8 @@ async def pres_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return AWAIT_SLIDE_COUNT
 
     if data == 'plang_other':
-        await query.edit_message_text(texts['ask_other_lang'], reply_markup=ReplyKeyboardMarkup([[texts['back_btn']]], resize_keyboard=True))
+        await query.message.delete()
+        await query.message.reply_text(texts['ask_other_lang'], reply_markup=ReplyKeyboardMarkup([[texts['back_btn']]], resize_keyboard=True))
         return AWAIT_OTHER_LANG
         
     pres_lang = data.split('_')[1]
