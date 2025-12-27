@@ -53,14 +53,14 @@ TEMP_DIR = Path("temp_images")
 AI_MODELS = [
     "google/gemini-2.0-flash-exp:free",
     "meta-llama/llama-3.3-70b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
+    "google/gemma-3-27b-it:free",
+    "qwen/qwen3-coder:free",
+    "mistralai/mistral-small-3.1-24b-instruct:free",
     "nousresearch/hermes-3-llama-3.1-405b:free",
-    "qwen/qwen-2.5-72b-instruct:free",
+    "google/gemma-3-12b-it:free",
+    "qwen/qwen-2.5-vl-7b-instruct:free",
     "xiaomi/mimo-v2-flash:free",
-    "openchat/openchat-7b:free",
-    "gryphe/mythomax-l2-13b:free",
-    "google/gemini-2.0-pro-exp-02-05:free",
-    "mistralai/pixtral-12b:free"
+    "openchat/openchat-7b:free"
 ]
 
 # Template Gallery Mapping
