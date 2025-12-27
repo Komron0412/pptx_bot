@@ -114,6 +114,7 @@ TEXTS = {
         'tmpl_modern': "🌟 Modern",
         'tmpl_random': "🎲 Surprise Me!",
         'cancel_msg': "❌ Cancelled. Returning to menu.",
+        'cancel_btn': "❌ Cancel",
         'back_btn': "⬅️ Back",
         'creating_msg': "🎨 Creating *{topic}* presentation...\n📊 Slides: {count}\n🌐 Language: {lang}\n✨ Template: *{tmpl}*\n\nThis may take a minute...",
         'success_caption': "📊 Your presentation: *{topic}*\nTemplate: {tmpl}",
@@ -155,6 +156,7 @@ TEXTS = {
         'tmpl_modern': "🌟 Zamonaviy",
         'tmpl_random': "🎲 Meni hayratda qoldiring!",
         'cancel_msg': "❌ Bekor qilindi. Menyu qaytarilmoqda.",
+        'cancel_btn': "❌ Bekor qilish",
         'back_btn': "⬅️ Orqaga",
         'creating_msg': "🎨 *{topic}* taqdimoti yaratilmoqda...\n📊 Slaydlar: {count}\n🌐 Til: {lang}\n✨ Shablon: *{tmpl}*\n\nBu bir daqiqa vaqt olishi mumkin...",
         'success_caption': "📊 Sizning taqdimotingiz: *{topic}*\nShablon: {tmpl}",
@@ -196,6 +198,7 @@ TEXTS = {
         'tmpl_modern': "🌟 Модерн",
         'tmpl_random': "🎲 Удиви меня!",
         'cancel_msg': "❌ Отменено. Возврат в меню.",
+        'cancel_btn': "❌ Отмена",
         'back_btn': "⬅️ Назад",
         'creating_msg': "🎨 Создание презентации *{topic}*...\n📊 Слайды: {count}\n🌐 Язык: {lang}\n✨ Шаблон: *{tmpl}*\n\nЭто может занять минуту...",
         'success_caption': "📊 Ваша презентация: *{topic}*\nШаблон: {tmpl}",
@@ -527,7 +530,7 @@ async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             texts['menu_create_prompt'],
             parse_mode='Markdown',
-            reply_markup=ReplyKeyboardMarkup([['/cancel']], resize_keyboard=True) 
+            reply_markup=ReplyKeyboardMarkup([[texts['cancel_btn']]], resize_keyboard=True) 
         )
         return AWAIT_TOPIC
         
@@ -600,7 +603,7 @@ async def topic_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['topic'] = topic
     
     # Ask for slide count
-    keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['back_btn']]]
+    keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['cancel_btn']]]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
     
     await update.message.reply_text(
@@ -621,7 +624,7 @@ async def slide_count_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
              texts['menu_create_prompt'],
              parse_mode='Markdown',
-             reply_markup=ReplyKeyboardMarkup([['/cancel']], resize_keyboard=True) 
+             reply_markup=ReplyKeyboardMarkup([[texts['cancel_btn']]], resize_keyboard=True) 
         )
         return AWAIT_TOPIC
     
@@ -667,7 +670,7 @@ async def pres_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     if data == 'back_to_slide_count':
         # Go back to slide count
-        keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['back_btn']]]
+        keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['cancel_btn']]]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
         await query.message.delete()
         await query.message.reply_text(
@@ -677,7 +680,7 @@ async def pres_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return AWAIT_SLIDE_COUNT
 
     if data == 'plang_other':
-        await query.edit_message_text(texts['ask_other_lang'])
+        await query.edit_message_text(texts['ask_other_lang'], reply_markup=ReplyKeyboardMarkup([[texts['cancel_btn']]], resize_keyboard=True))
         return AWAIT_OTHER_LANG
         
     pres_lang = data.split('_')[1]
@@ -733,7 +736,7 @@ async def show_template_selection(update_obj, context, texts):
             InlineKeyboardButton(texts['tmpl_random'], callback_data='template_random')
         ],
         [
-            InlineKeyboardButton(texts['back_btn'], callback_data='back_to_pres_lang')
+            InlineKeyboardButton(texts['cancel_btn'], callback_data='cancel')
         ]
     ]
     
@@ -757,10 +760,19 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user.get('lang', 'en') if user else 'en'
     texts = TEXTS.get(lang, TEXTS['en'])
     
-    await update.message.reply_text(
-        texts['cancel_msg'],
-        reply_markup=get_keyboard(lang)
-    )
+    # Handle both Message and CallbackQuery
+    if update.message:
+        await update.message.reply_text(
+            texts['cancel_msg'],
+            reply_markup=get_keyboard(lang)
+        )
+    elif update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(texts['cancel_msg'])
+        await update.callback_query.message.reply_text(
+            texts['menu_title'],
+            reply_markup=get_keyboard(lang)
+        )
     return MAIN_MENU
 
 async def template_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -952,36 +964,45 @@ def main():
     
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
     
+    # Define localized cancel strings for filters
+    cancel_filter = filters.Regex('^(❌ Cancel|❌ Bekor qilish|❌ Отмена)$') | filters.COMMAND
+    
     # Conversation Handler
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
             LANGUAGE: [CallbackQueryHandler(language_callback, pattern='^lang_')],
-            NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name_input)],
-            PHONE: [MessageHandler(filters.CONTACT | filters.TEXT, phone_input)],
+            NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND & ~cancel_filter, name_input)],
+            PHONE: [MessageHandler((filters.CONTACT | filters.TEXT) & ~filters.COMMAND & ~cancel_filter, phone_input)],
             MAIN_MENU: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, menu_handler),
                 CallbackQueryHandler(change_info_callback, pattern='^change_info$')
             ],
             AWAIT_TOPIC: [
                 CommandHandler("cancel", cancel),
+                MessageHandler(cancel_filter, cancel),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, topic_input),
             ],
             AWAIT_SLIDE_COUNT: [
+                MessageHandler(cancel_filter, cancel),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, slide_count_input)
             ],
             AWAIT_PRES_LANG: [
+                CallbackQueryHandler(cancel, pattern='^cancel$'),
                 CallbackQueryHandler(pres_lang_callback, pattern='^plang_'),
                 CallbackQueryHandler(pres_lang_callback, pattern='^back_to_slide_count$')
             ],
             AWAIT_OTHER_LANG: [
+                MessageHandler(cancel_filter, cancel),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, other_lang_input)
             ]
         },
         fallbacks=[
-            CommandHandler("start", start), 
+            CommandHandler("start", start),
+            CommandHandler("cancel", cancel),
+            MessageHandler(cancel_filter, cancel),
             CallbackQueryHandler(template_callback, pattern='^template_'),
-            CallbackQueryHandler(template_callback, pattern='^back_to_pres_lang$'),
+            CallbackQueryHandler(cancel, pattern='^cancel$'),
             CallbackQueryHandler(pdf_callback, pattern='^get_pdf$')
         ]
     )
