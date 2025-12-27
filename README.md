@@ -59,6 +59,24 @@ A powerful and intuitive Telegram bot that generates professional PowerPoint pre
 | `PEXELS_API_KEY` | Pexels API Key | Optional |
 | `PIXABAY_API_KEY` | Pixabay API Key | Optional |
 
+## 🐳 Deployment with Docker (Recommended)
+
+The easiest way to deploy the bot is using Docker, as it bundles all dependencies (LibreOffice, PostgreSQL, Fonts).
+
+1. **Install Docker & Docker Compose** on your server.
+2. **Configure your `.env`**:
+   ```bash
+   cp .env.example .env
+   # Set your TELEGRAM_BOT_TOKEN and OPENROUTER_API_KEY
+   # Set DATABASE_URL=postgresql://postgres:postgres@db:5432/pptx_bot
+   ```
+3. **Deploy**:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+The bot will automatically restart if the system reboots. Use `docker-compose logs -f bot` to check the logs.
+
 ## 📁 Project Structure
 
 - `bot.py`: Main bot logic and Presentation Generator.
