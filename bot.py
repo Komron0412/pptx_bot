@@ -129,7 +129,8 @@ TEXTS = {
         'error_gen': "❌ Sorry, error generating presentation. Try again later.",
         'btn_get_pdf': "📄 Get PDF Version",
         'converting_pdf': "⏳ Converting to PDF...",
-        'whats_next': "What's next?"
+        'whats_next': "What's next?",
+        'bot_info': "🤖 *Telegram PPTX Bot*\n\nVersion: 1.1.0\nPowered by OpenRouter AI & python-pptx\n🗄️ Database: PostgreSQL\n\n👤 *Owner:* @Toshkanboev\n📞 *Support:* @Toshkanboev"
     },
     'uz': {
         'welcome': "👋 Xush kelibsiz! Iltimos, tilni tanlang:",
@@ -172,7 +173,8 @@ TEXTS = {
         'error_gen': "❌ Kechirasiz, taqdimot yaratishda xatolik. Keyinroq urinib ko'ring.",
         'btn_get_pdf': "📄 PDF variantini olish",
         'converting_pdf': "⏳ PDF-ga o'tkazilmoqda...",
-        'whats_next': "Endi nima qilamiz?"
+        'whats_next': "Endi nima qilamiz?",
+        'bot_info': "🤖 *Telegram PPTX Bot*\n\nVersiya: 1.1.0\nOpenRouter AI va python-pptx tomonidan quvvatlanadi\n🗄️ Ma'lumotlar ombori: PostgreSQL\n\n👤 *Egani:* @Toshkanboev\n📞 *Yordam:* @Toshkanboev"
     },
     'ru': {
         'welcome': "👋 Добро пожаловать! Пожалуйста, выберите язык:",
@@ -215,7 +217,8 @@ TEXTS = {
         'error_gen': "❌ Извините, ошибка создания презентации. Попробуйте позже.",
         'btn_get_pdf': "📄 Получить PDF версию",
         'converting_pdf': "⏳ Конвертация в PDF...",
-        'whats_next': "Что дальше?"
+        'whats_next': "Что дальше?",
+        'bot_info': "🤖 *Telegram PPTX Bot*\n\nВерсия: 1.1.0\nРаботает на OpenRouter AI и python-pptx\n🗄️ База данных: PostgreSQL\n\n👤 *Владелец:* @Toshkanboev\n📞 *Поддержка:* @Toshkanboev"
     }
 }
 
@@ -595,7 +598,7 @@ async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == texts['menu_bot']:
         # Show bot info
         await update.message.reply_text(
-            "🤖 *Telegram PPTX Bot*\n\nVersion: 1.1.0\nPowered by OpenRouter AI & python-pptx\n🗄️ Database: PostgreSQL",
+            texts['bot_info'],
             parse_mode='Markdown'
         )
         return MAIN_MENU
@@ -982,8 +985,44 @@ async def change_info_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     return LANGUAGE
 
 async def post_init(application: Application):
-    """Initialize database connection"""
+    """Initialize database connection and set bot descriptions"""
     await user_manager.init()
+    
+    # Set localized bot descriptions
+    try:
+        # English
+        await application.bot.set_my_description(
+            "This bot helps you create professional PowerPoint presentations from simple keywords or text blocks. Powered by AI.",
+            language_code="en"
+        )
+        await application.bot.set_my_short_description(
+            "AI PowerPoint Presentation Generator.",
+            language_code="en"
+        )
+        
+        # Uzbek
+        await application.bot.set_my_description(
+            "Ushbu bot kalit so'zlar yoki matn bloklaridan professional PowerPoint taqdimotlarini yaratishga yordam beradi. AI tomonidan quvvatlanadi.",
+            language_code="uz"
+        )
+        await application.bot.set_my_short_description(
+            "AI PowerPoint taqdimot generatori.",
+            language_code="uz"
+        )
+        
+        # Russian
+        await application.bot.set_my_description(
+            "Этот бот помогает создавать профессиональные презентации PowerPoint из ключевых слов или блоков текста. Работает на базе ИИ.",
+            language_code="ru"
+        )
+        await application.bot.set_my_short_description(
+            "Генератор презентаций PowerPoint с ИИ.",
+            language_code="ru"
+        )
+        
+        logger.info("Bot descriptions set successfully for all languages.")
+    except Exception as e:
+        logger.error(f"Error setting bot descriptions: {e}")
 
 def main():
     """Start the bot"""
