@@ -1,0 +1,8 @@
+python-telegram-bot
+python-pptx
+requests
+Pillow
+aiohttp
+python-dotenv
+asyncpg>=0.29.0
+aiohttp>=3.9.1
