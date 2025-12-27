@@ -14,6 +14,7 @@ from telegram.ext import (
     filters, ContextTypes, ConversationHandler
 )
 import aiohttp
+import json
 import asyncio
 
 from image_service import ImageService
@@ -50,12 +51,14 @@ TEMP_DIR = Path("temp_images")
 
 # AI Models (OpenRouter free tier)
 AI_MODELS = [
-    "xiaomi/mimo-v2-flash:free",
     "google/gemini-2.0-flash-exp:free",
-    "mistralai/mistral-7b-instruct:free",
+    "google/learnlm-1.5-pro-experimental:free",
     "meta-llama/llama-3.3-70b-instruct:free",
     "meta-llama/llama-3.2-3b-instruct:free",
-    "liquid/lfm-40b:free"
+    "mistralai/mistral-7b-instruct:free",
+    "microsoft/phi-3-medium-128k-instruct:free",
+    "deepseek/deepseek-chat:free",
+    "qwen/qwen-2.5-72b-instruct:free"
 ]
 
 # Template Gallery Mapping
