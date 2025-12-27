@@ -436,17 +436,28 @@ def get_keyboard(lang):
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start command - Check registration"""
+    """Start command - Check registration or resume session"""
     user_id = update.effective_user.id
     
     # Check if user exists
     user_data = await user_manager.get_user(user_id)
     
     if user_data:
-        # User exists, show menu
+        # User exists, check if they sent a menu button command
         lang = user_data.get('lang', 'en')
         texts = TEXTS.get(lang, TEXTS['en'])
+        text = update.message.text if update.message else None
         
+        # If user clicked a menu button, handle it directly
+        menu_buttons = [
+            texts['menu_create'], texts['menu_templates'], 
+            texts['menu_history'], texts['menu_info'], texts['menu_bot']
+        ]
+        
+        if text in menu_buttons:
+            return await menu_handler(update, context)
+            
+        # Otherwise show menu and return to MAIN_MENU state
         await update.message.reply_text(
             texts['menu_title'],
             reply_markup=get_keyboard(lang)
@@ -1037,7 +1048,15 @@ def main():
     
     # Conversation Handler
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[
+            CommandHandler("start", start),
+            # Allow registered users to "wake up" the bot by sending any text or clicking a button
+            MessageHandler(filters.TEXT & ~filters.COMMAND, start),
+            # Global callback handlers for older message buttons
+            CallbackQueryHandler(change_info_callback, pattern='^change_info$'),
+            CallbackQueryHandler(pdf_callback, pattern='^get_pdf$'),
+            CallbackQueryHandler(template_callback, pattern='^template_')
+        ],
         states={
             LANGUAGE: [CallbackQueryHandler(language_callback, pattern='^lang_')],
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND & ~cancel_filter, name_input)],
