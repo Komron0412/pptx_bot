@@ -52,13 +52,15 @@ TEMP_DIR = Path("temp_images")
 # AI Models (OpenRouter free tier)
 AI_MODELS = [
     "google/gemini-2.0-flash-exp:free",
-    "google/learnlm-1.5-pro-experimental:free",
     "meta-llama/llama-3.3-70b-instruct:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
     "mistralai/mistral-7b-instruct:free",
-    "microsoft/phi-3-medium-128k-instruct:free",
-    "deepseek/deepseek-chat:free",
-    "qwen/qwen-2.5-72b-instruct:free"
+    "nousresearch/hermes-3-llama-3.1-405b:free",
+    "qwen/qwen-2.5-72b-instruct:free",
+    "xiaomi/mimo-v2-flash:free",
+    "openchat/openchat-7b:free",
+    "gryphe/mythomax-l2-13b:free",
+    "google/gemini-2.0-pro-exp-02-05:free",
+    "mistralai/pixtral-12b:free"
 ]
 
 # Template Gallery Mapping
