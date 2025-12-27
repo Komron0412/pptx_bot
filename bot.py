@@ -1103,7 +1103,9 @@ def main():
             CallbackQueryHandler(cancel, pattern='^cancel$'),
             CallbackQueryHandler(pdf_callback, pattern='^get_pdf$')
         ],
-        per_message=True
+        per_user=True,
+        per_chat=True,
+        per_message=False
     )
     
     application.add_handler(conv_handler)
