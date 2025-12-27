@@ -60,7 +60,8 @@ AI_MODELS = [
     "google/gemma-3-12b-it:free",
     "qwen/qwen-2.5-vl-7b-instruct:free",
     "xiaomi/mimo-v2-flash:free",
-    "openchat/openchat-7b:free"
+    "mistralai/devstral-2512:free",
+    "kwaipilot/kat-coder-pro:free"
 ]
 
 # Template Gallery Mapping
