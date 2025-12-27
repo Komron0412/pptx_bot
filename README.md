@@ -1,170 +1,72 @@
-# 🎨 Telegram PowerPoint Generator Bot
+# 📊 AI Telegram PowerPoint Bot
 
-A Telegram bot that creates beautiful PowerPoint presentations using AI. Simply provide a topic, and the bot will generate a professionally designed presentation with relevant images.
+A powerful and intuitive Telegram bot that generates professional PowerPoint presentations (`.pptx`) from a simple topic or keyword. Powered by OpenRouter AI (LLMs) and `python-pptx`.
 
-## ✨ Features
+## ✨ Key Features
 
-- **AI-Powered Content**: Uses OpenRouter API (Meta Llama 3.1) to generate presentation outlines
-- **Beautiful Designs**: Modern templates with gradient backgrounds, custom color schemes, and professional typography
-- **Automatic Images**: Fetches relevant images from Unsplash (with fallback to Picsum)
-- **Easy to Use**: Just send `/create [topic]` and get your presentation
+- **🚀 AI-Powered Content**: Automatically generates structured outlines, bullet points, and speaker notes based on any topic.
+- **🖼️ Smart Image Integration**: 10-stage fallback system ensures every slide has a relevant, high-quality image.
+  - *Sources*: Unsplash, Pexels, Pixabay, Wikimedia, Pollinations AI, and local high-quality placeholders.
+- **🎨 7+ Premium Templates Gallery**: Choose from Minimalist, Bold Modern, Corporate, Creative, Elegant, Geometric, and Modern styles.
+- **📄 PDF Export**: Convert your generated presentations to PDF format with a single click.
+- **📜 Generation History**: Access your recent presentations and download them again at any time.
+- **🗄️ Robust Persistence**: PostgreSQL integration for reliable user data and history management.
+- **🌐 Multi-Language Support**: English, Uzbek, and Russian interface and presentation generation.
+
+## 🛠️ Prerequisites
+
+- **Python 3.9+**
+- **LibreOffice** (Required for PDF conversion)
+  - *macOS*: `brew install --cask libreoffice`
+  - *Ubuntu/Debian*: `sudo apt install libreoffice`
+- **PostgreSQL** (Optional, falls back to local JSON if not available)
+- **OpenRouter API Key** (Required for AI generation)
+- **Optional API Keys**: Unsplash, Pexels, Pixabay (for better image results)
 
 ## 🚀 Quick Start
 
-### 1. Clone and Install
-
-```bash
-cd telegram-pptx-bot
-pip install -r requirements.txt
-```
-
-### 2. Configure Environment Variables
-
-Create a `.env` file from the example:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your API keys:
-
-```env
-# Required
-TELEGRAM_BOT_TOKEN=your_bot_token_from_botfather
-OPENROUTER_API_KEY=your_openrouter_api_key
-
-# Optional (for better images)
-UNSPLASH_ACCESS_KEY=your_unsplash_access_key
-```
-
-#### Getting API Keys
-
-1. **Telegram Bot Token**
-   - Message [@BotFather](https://t.me/botfather) on Telegram
-   - Send `/newbot` and follow the prompts
-   - Copy the token provided
-
-2. **OpenRouter API Key**
-   - Sign up at [OpenRouter](https://openrouter.ai/)
-   - Go to Keys section
-   - Create a new API key
-
-3. **Unsplash Access Key** (Optional)
-   - Sign up at [Unsplash Developers](https://unsplash.com/developers)
-   - Create a new application
-   - Copy your Access Key
-
-### 3. Run the Bot
-
-```bash
-python bot.py
-```
-
-You should see:
-```
-Bot started! Press Ctrl+C to stop.
-```
-
-## 📱 Usage
-
-1. **Start the bot**
-   ```
-   /start
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/telegram-pptx-bot.git
+   cd telegram-pptx-bot
    ```
 
-2. **Create a presentation**
-   ```
-   /create Climate Change Solutions
-   ```
-   or
-   ```
-   /create Introduction to Machine Learning
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
    ```
 
-3. **Wait for your presentation**
-   - The bot will generate content using AI (takes ~30-60 seconds)
-   - You'll receive a `.pptx` file
-   - Download and open in PowerPoint, Google Slides, or any compatible software
+3. **Configure Environment Variables**:
+   Copy `.env.example` to `.env` and fill in your credentials:
+   ```bash
+   cp .env.example .env
+   ```
 
-## 🎨 Available Color Schemes
+4. **Run the Bot**:
+   ```bash
+   python bot.py
+   ```
 
-The bot randomly selects from 5 modern color schemes:
+## ⚙️ Configuration (.env)
 
-- **Vibrant**: Purple and pink gradients
-- **Professional**: Blue and orange business theme
-- **Nature**: Green and yellow earth tones
-- **Tech**: Blue and purple tech theme
-- **Sunset**: Red and orange warm colors
+| Variable | Description | Requirement |
+|----------|-------------|-------------|
+| `TELEGRAM_BOT_TOKEN` | Your Telegram Bot API token | Required |
+| `OPENROUTER_API_KEY` | OpenRouter API key for AI generation | Required |
+| `DATABASE_URL` | PostgreSQL connection string | Optional (Falls back to JSON) |
+| `LIBREOFFICE_PATH` | Path to LibreOffice binary (`soffice`) | Optional (For PDF) |
+| `UNSPLASH_ACCESS_KEY` | Unsplash API Access Key | Optional |
+| `PEXELS_API_KEY` | Pexels API Key | Optional |
+| `PIXABAY_API_KEY` | Pixabay API Key | Optional |
 
 ## 📁 Project Structure
 
-```
-telegram-pptx-bot/
-├── bot.py                  # Main bot application
-├── image_service.py        # Image fetching from Unsplash/Picsum
-├── templates/
-│   ├── modern_template.py  # PowerPoint template generator
-│   └── styles.py           # Color schemes and typography
-├── requirements.txt        # Python dependencies
-├── .env.example           # Environment variables template
-└── README.md              # This file
-```
+- `bot.py`: Main bot logic and Presentation Generator.
+- `user_manager.py`: Database and user session management.
+- `image_service.py`: Multi-source image fetching and caching.
+- `templates/`: Modular PPTX templates with different styles.
+- `assets/placeholders/`: Local fallback images for offline/service failures.
 
-## 🛠️ Technical Details
+## 📝 License
 
-- **Framework**: python-telegram-bot 20.7
-- **AI Model**: Meta Llama 3.1 8B (via OpenRouter)
-- **Presentation**: python-pptx 0.6.23
-- **Images**: Unsplash API + Picsum fallback
-- **Async**: aiohttp for non-blocking API calls
-
-## 🐛 Troubleshooting
-
-### Bot doesn't respond
-- Check your `TELEGRAM_BOT_TOKEN` is correct
-- Ensure the bot is running (`python bot.py`)
-
-### Presentations have no content
-- Verify your `OPENROUTER_API_KEY` is valid
-- Check the console for error messages
-
-### No images in slides
-- Add `UNSPLASH_ACCESS_KEY` to `.env` for better images
-- The bot will use fallback images if Unsplash is not configured
-
-### "Module not found" error
-```bash
-pip install -r requirements.txt
-```
-
-## 📝 Example Output
-
-When you run `/create Digital Marketing Strategy`, the bot generates:
-- Title slide with gradient background
-- 5-7 content slides with:
-  - Professional bullet points
-  - Relevant images
-  - Consistent color scheme and typography
-
-## 🤝 Contributing
-
-Feel free to fork and improve! Some ideas:
-- Add more color schemes
-- Support for different slide layouts
-- Custom templates
-- Multi-language support
-
-## 📄 License
-
-MIT License - feel free to use for personal or commercial projects
-
-## 🙏 Credits
-
-- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
-- [python-pptx](https://github.com/scanny/python-pptx)
-- [OpenRouter](https://openrouter.ai/)
-- [Unsplash](https://unsplash.com/)
-
----
-
-Made with ❤️ using AI and Python
+Distributed under the MIT License. See `LICENSE` for more information.
