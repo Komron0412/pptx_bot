@@ -1102,7 +1102,8 @@ def main():
             CallbackQueryHandler(template_callback, pattern='^(template_|back_to_pres_lang$)'),
             CallbackQueryHandler(cancel, pattern='^cancel$'),
             CallbackQueryHandler(pdf_callback, pattern='^get_pdf$')
-        ]
+        ],
+        per_message=True
     )
     
     application.add_handler(conv_handler)
