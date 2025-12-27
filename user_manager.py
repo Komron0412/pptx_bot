@@ -7,10 +7,34 @@ from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
+# Constants
+DEFAULT_JSON_PATH = "users.json"
+
+SCHEMA_USERS = '''
+    CREATE TABLE IF NOT EXISTS users (
+        user_id BIGINT PRIMARY KEY,
+        data JSONB NOT NULL
+    )
+'''
+
+SCHEMA_PRESENTATIONS = '''
+    CREATE TABLE IF NOT EXISTS presentations (
+        id SERIAL PRIMARY KEY,
+        user_id BIGINT,
+        topic TEXT NOT NULL,
+        template TEXT,
+        slide_count INTEGER,
+        language TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+'''
+
+SCHEMA_INDEX = 'CREATE INDEX IF NOT EXISTS idx_pres_user ON presentations(user_id)'
+
 class UserManager:
     """Manages user data persistence using PostgreSQL with JSON fallback"""
     
-    def __init__(self, db_url: Optional[str] = None, json_path="users.json"):
+    def __init__(self, db_url: Optional[str] = None, json_path=DEFAULT_JSON_PATH):
         self.db_url = db_url or os.getenv("DATABASE_URL")
         self.json_path = json_path
         self.users_cache: Dict[str, dict] = {}
@@ -24,24 +48,9 @@ class UserManager:
                 pool = await asyncpg.create_pool(self.db_url)
                 async with pool.acquire() as conn:
                     # Create tables one by one for better reliability
-                    await conn.execute('''
-                        CREATE TABLE IF NOT EXISTS users (
-                            user_id BIGINT PRIMARY KEY,
-                            data JSONB NOT NULL
-                        )
-                    ''')
-                    await conn.execute('''
-                        CREATE TABLE IF NOT EXISTS presentations (
-                            id SERIAL PRIMARY KEY,
-                            user_id BIGINT,
-                            topic TEXT NOT NULL,
-                            template TEXT,
-                            slide_count INTEGER,
-                            language TEXT,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        )
-                    ''')
-                    await conn.execute('CREATE INDEX IF NOT EXISTS idx_pres_user ON presentations(user_id)')
+                    await conn.execute(SCHEMA_USERS)
+                    await conn.execute(SCHEMA_PRESENTATIONS)
+                    await conn.execute(SCHEMA_INDEX)
                 
                 # Assign pool to self after tables are guaranteed to exist
                 self.pool = pool

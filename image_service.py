@@ -10,6 +10,10 @@ from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
+# Constants
+CACHE_DIR = Path("temp_images")
+PLACEHOLDER_DIR = Path("assets/placeholders")
+
 class ImageService:
     """Fetch relevant images from various sources"""
     
@@ -18,7 +22,7 @@ class ImageService:
         self.unsplash_key = unsplash_key
         self.pexels_key = pexels_key
         self.pixabay_key = pixabay_key
-        self.cache_dir = Path("temp_images")
+        self.cache_dir = CACHE_DIR
         self.cache_dir.mkdir(exist_ok=True)
         self.unsplash_disabled_until = 0
         self.pollinations_disabled_until = 0
@@ -27,7 +31,7 @@ class ImageService:
         self.wikimedia_disabled_until = 0
         self.pexels_disabled_until = 0
         self.pixabay_disabled_until = 0
-        self.placeholder_dir = Path("assets/placeholders")
+        self.placeholder_dir = PLACEHOLDER_DIR
         self.placeholder_dir.mkdir(parents=True, exist_ok=True)
     
     def _is_disabled(self, provider):

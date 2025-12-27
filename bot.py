@@ -14,13 +14,16 @@ from telegram.ext import (
     filters, ContextTypes, ConversationHandler
 )
 import aiohttp
-import json
 import asyncio
 
 from image_service import ImageService
 from templates.modern_template import ModernTemplate
 from templates.styles import ColorScheme
-from templates.template_collection import get_random_template
+from templates.template_collection import (
+    get_random_template, MinimalistTemplate, BoldModernTemplate, 
+    CorporateTemplate, CreativeTemplate, ElegantTemplate, 
+    GeometricTemplate
+)
 from user_manager import UserManager
 
 # Load environment variables
@@ -40,6 +43,31 @@ UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
 PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')
 LIBREOFFICE_PATH = os.getenv('LIBREOFFICE_PATH', 'libreoffice') # Default to command names
+
+# Directories
+OUTPUT_DIR = Path("generated_presentations")
+TEMP_DIR = Path("temp_images")
+
+# AI Models (OpenRouter free tier)
+AI_MODELS = [
+    "xiaomi/mimo-v2-flash:free",
+    "google/gemini-2.0-flash-exp:free",
+    "mistralai/mistral-7b-instruct:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "liquid/lfm-40b:free"
+]
+
+# Template Gallery Mapping
+TEMPLATE_MAP = {
+    'minimal': MinimalistTemplate,
+    'bold': BoldModernTemplate,
+    'corporate': CorporateTemplate,
+    'creative': CreativeTemplate,
+    'elegant': ElegantTemplate,
+    'geometric': GeometricTemplate,
+    'modern': ModernTemplate,
+}
 
 # Initialize services
 image_service = ImageService(
@@ -221,17 +249,7 @@ Requirements:
             "X-Title": "Telegram PPTX Bot"
         }
         
-        # Try multiple free models as fallback
-        models = [
-            "xiaomi/mimo-v2-flash:free",
-            "google/gemini-2.0-flash-exp:free",
-            "mistralai/mistral-7b-instruct:free",
-            "meta-llama/llama-3.3-70b-instruct:free",
-            "meta-llama/llama-3.2-3b-instruct:free",
-            "liquid/lfm-40b:free"
-        ]
-        
-        for model in models:
+        for model in AI_MODELS:
             payload = {
                 "model": model,
                 "messages": [
@@ -298,19 +316,6 @@ Requirements:
             if template_name == 'random' or template_name is None:
                 template_class = get_random_template()
             else:
-                from templates.template_collection import (
-                    MinimalistTemplate, BoldModernTemplate, CorporateTemplate,
-                    CreativeTemplate, ElegantTemplate, GeometricTemplate, ModernTemplate
-                )
-                TEMPLATE_MAP = {
-                    'minimal': MinimalistTemplate,
-                    'bold': BoldModernTemplate,
-                    'corporate': CorporateTemplate,
-                    'creative': CreativeTemplate,
-                    'elegant': ElegantTemplate,
-                    'geometric': GeometricTemplate,
-                    'modern': ModernTemplate,
-                }
                 template_class = TEMPLATE_MAP.get(template_name, ModernTemplate)
             
             template = template_class(color_scheme=color_scheme)
@@ -353,11 +358,10 @@ Requirements:
                 template.add_content_slide(title, bullets, image_path=image_path, credit=credit)
             
             # Save presentation
-            output_dir = Path("generated_presentations")
-            output_dir.mkdir(exist_ok=True)
+            OUTPUT_DIR.mkdir(exist_ok=True)
             
             filename = f"{topic[:30].replace(' ', '_')}.pptx"
-            pptx_path = output_dir / filename
+            pptx_path = OUTPUT_DIR / filename
             template.save(str(pptx_path))
             
             return str(pptx_path)
