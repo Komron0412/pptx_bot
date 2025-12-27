@@ -118,6 +118,7 @@ TEXTS = {
         'tmpl_geometric': "⬡ Geometric",
         'tmpl_modern': "🌟 Modern",
         'tmpl_random': "🎲 Surprise Me!",
+        'choose_template': "🎨 Choose a template for *{topic}*:",
         'cancel_msg': "❌ Cancelled. Returning to menu.",
         'cancel_btn': "❌ Cancel",
         'back_btn': "⬅️ Back",
@@ -160,6 +161,7 @@ TEXTS = {
         'tmpl_geometric': "⬡ Geometrik",
         'tmpl_modern': "🌟 Zamonaviy",
         'tmpl_random': "🎲 Meni hayratda qoldiring!",
+        'choose_template': "🎨 *{topic}* uchun shablon tanlang:",
         'cancel_msg': "❌ Bekor qilindi. Menyu qaytarilmoqda.",
         'cancel_btn': "❌ Bekor qilish",
         'back_btn': "⬅️ Orqaga",
@@ -202,6 +204,7 @@ TEXTS = {
         'tmpl_geometric': "⬡ Геометрический",
         'tmpl_modern': "🌟 Модерн",
         'tmpl_random': "🎲 Удиви меня!",
+        'choose_template': "🎨 Выберите шаблон для *{topic}*:",
         'cancel_msg': "❌ Отменено. Возврат в меню.",
         'cancel_btn': "❌ Отмена",
         'back_btn': "⬅️ Назад",
@@ -608,7 +611,7 @@ async def topic_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['topic'] = topic
     
     # Ask for slide count
-    keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['cancel_btn']]]
+    keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['back_btn']]]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
     
     await update.message.reply_text(
@@ -675,7 +678,7 @@ async def pres_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     if data == 'back_to_slide_count':
         # Go back to slide count
-        keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['cancel_btn']]]
+        keyboard = [['5', '8', '10'], ['12', '15', '20'], [texts['back_btn']]]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
         await query.message.delete()
         await query.message.reply_text(
@@ -685,7 +688,7 @@ async def pres_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return AWAIT_SLIDE_COUNT
 
     if data == 'plang_other':
-        await query.edit_message_text(texts['ask_other_lang'], reply_markup=ReplyKeyboardMarkup([[texts['cancel_btn']]], resize_keyboard=True))
+        await query.edit_message_text(texts['ask_other_lang'], reply_markup=ReplyKeyboardMarkup([[texts['back_btn']]], resize_keyboard=True))
         return AWAIT_OTHER_LANG
         
     pres_lang = data.split('_')[1]
@@ -696,14 +699,34 @@ async def pres_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def other_lang_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom language input"""
-    pres_lang = update.message.text
-    context.user_data['pres_lang'] = pres_lang
-    
-    # Get texts for show_template_selection
+    text = update.message.text
     user = await user_manager.get_user(update.effective_user.id)
     lang = user.get('lang', 'en') if user else 'en'
     texts = TEXTS.get(lang, TEXTS['en'])
-
+    
+    if text == texts['back_btn']:
+        # Go back to Presentation Language selection
+        keyboard = [
+            [
+                InlineKeyboardButton("🇺🇿 O'zbek", callback_data='plang_Uzbek'),
+                InlineKeyboardButton("🇷🇺 Русский", callback_data='plang_Russian')
+            ],
+            [
+                InlineKeyboardButton("🇬🇧 English", callback_data='plang_English'),
+                InlineKeyboardButton(texts['pres_lang_btn_other'], callback_data='plang_other')
+            ],
+            [
+                InlineKeyboardButton(texts['back_btn'], callback_data='back_to_slide_count')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            texts['ask_pres_lang'],
+            reply_markup=reply_markup
+        )
+        return AWAIT_PRES_LANG
+    
+    context.user_data['pres_lang'] = text
     # Show template selection
     return await show_template_selection(update, context, texts)
 
@@ -741,7 +764,7 @@ async def show_template_selection(update_obj, context, texts):
             InlineKeyboardButton(texts['tmpl_random'], callback_data='template_random')
         ],
         [
-            InlineKeyboardButton(texts['cancel_btn'], callback_data='cancel')
+            InlineKeyboardButton(texts['back_btn'], callback_data='back_to_pres_lang')
         ]
     ]
     
@@ -749,7 +772,7 @@ async def show_template_selection(update_obj, context, texts):
     # To avoid spamming on 'Back' navigation, we only show buttons here
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    text = f"🎨 Choose a template for *{topic}*:"
+    text = texts['choose_template'].format(topic=topic)
     
     if isinstance(update_obj, Update):
         await update_obj.message.reply_text(text, reply_markup=reply_markup, parse_mode='Markdown')
@@ -1006,7 +1029,7 @@ def main():
             CommandHandler("start", start),
             CommandHandler("cancel", cancel),
             MessageHandler(cancel_filter, cancel),
-            CallbackQueryHandler(template_callback, pattern='^template_'),
+            CallbackQueryHandler(template_callback, pattern='^(template_|back_to_pres_lang$)'),
             CallbackQueryHandler(cancel, pattern='^cancel$'),
             CallbackQueryHandler(pdf_callback, pattern='^get_pdf$')
         ]
