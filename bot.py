@@ -383,23 +383,34 @@ Requirements:
 
     async def convert_to_pdf(self, pptx_path: str):
         """Convert PPTX to PDF using LibreOffice (if available)"""
+        import shutil
         output_dir = os.path.dirname(pptx_path)
         
-        # Determine the binary to use
-        lb_path = LIBREOFFICE_PATH
+        # Priority list for binaries to try
+        search_paths = [
+            os.getenv('LIBREOFFICE_PATH'), # 1. User specified path
+            'libreoffice',                 # 2. System command
+            'soffice',                     # 3. System command (alias)
+            '/usr/bin/libreoffice',        # 4. Standard Linux path
+            '/usr/bin/soffice',            # 5. Standard Linux path
+            '/Applications/LibreOffice.app/Contents/MacOS/soffice' # 6. Standard macOS path
+        ]
         
-        # Common macOS location fallback if default 'libreoffice' command fails
-        common_mac_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+        lb_path = None
+        for p in search_paths:
+            if not p: continue
+            # shutil.which works for both command names in PATH and absolute paths
+            found = shutil.which(p)
+            if found:
+                lb_path = found
+                break
         
+        if not lb_path:
+            logger.error("LibreOffice/soffice binary not found. PDF conversion unavailable.")
+            return None
+
         try:
-            # Check if current command exists, if not and on Mac, try common path
-            import subprocess
-            try:
-                subprocess.run([lb_path, '--version'], capture_output=True, check=False)
-            except FileNotFoundError:
-                if os.path.exists(common_mac_path):
-                    lb_path = common_mac_path
-            
+            logger.info(f"Converting {pptx_path} to PDF using: {lb_path}")
             process = await asyncio.create_subprocess_exec(
                 lb_path, '--headless', '--convert-to', 'pdf', 
                 '--outdir', output_dir, pptx_path,
