@@ -7,7 +7,7 @@ A powerful and intuitive Telegram bot that generates professional PowerPoint pre
 - **🚀 AI-Powered Content**: Automatically generates structured outlines, bullet points, and speaker notes based on any topic.
 - **🖼️ Smart Image Integration**: 10-stage fallback system ensures every slide has a relevant, high-quality image.
   - *Sources*: Unsplash, Pexels, Pixabay, Wikimedia, Pollinations AI, and local high-quality placeholders.
-- **🎨 7+ Premium Templates Gallery**: Choose from Minimalist, Bold Modern, Corporate, Creative, Elegant, Geometric, and Modern styles.
+- **🎨 7+ Professional Templates Gallery**: Choose from Minimalist, Bold Modern, Corporate, Creative, Elegant, Geometric, and Modern styles.
 - **📄 PDF Export**: Convert your generated presentations to PDF format with a single click.
 - **📜 Generation History**: Access your recent presentations and download them again at any time.
 - **🗄️ Robust Persistence**: PostgreSQL integration for reliable user data and history management.
